@@ -2,7 +2,13 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.database import engine, Base
-from app.routers.health import router as health_router
+from app.routers import (
+    health_router,
+    auth_router,
+    users_router,
+    club_router,
+    activity_router,
+)
 from app.models import User, Club, ClubMember, ClubActivity
 
 Base.metadata.create_all(bind=engine)
@@ -41,6 +47,10 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 app.include_router(health_router)
 app.include_router(health_router, prefix="/api/v1")
+app.include_router(auth_router, prefix="/api/v1")
+app.include_router(users_router, prefix="/api/v1")
+app.include_router(club_router, prefix="/api/v1")
+app.include_router(activity_router, prefix="/api/v1")
 
 
 @app.get("/")
