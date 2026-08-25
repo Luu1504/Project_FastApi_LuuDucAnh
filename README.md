@@ -1,150 +1,133 @@
-# Student Club Management API (FastAPI Backend)
+# Đồ Án: Hệ Thống Quản Lý Câu Lạc Bộ Sinh Viên (FastAPI Backend)
 
-Hệ thống RESTful API Quản lý Câu lạc bộ Sinh viên (Student Club Management API) được xây dựng bằng **FastAPI**, **SQLAlchemy** và **MySQL / SQLite**, tuân thủ cấu trúc module hóa chuẩn công nghiệp theo đặc tả phân rã công việc.
+Hệ thống Backend RESTful API phục vụ quản lý hoạt động câu lạc bộ sinh viên, phân quyền người dùng (Admin, Chủ nhiệm CLB, Thành viên) và theo dõi công việc.
 
 ---
 
-## 📁 1. Cấu trúc thư mục dự án
+## 🛠️ Công Nghệ Sử Dụng
+
+- **Ngôn ngữ:** Python 3.10+
+- **Framework:** FastAPI
+- **Cơ sở dữ liệu:** SQLite / SQLAlchemy ORM
+- **Xác thực & Bảo mật:** Bcrypt (băm mật khẩu) & PyJWT (JWT Bearer Token)
+- **Kiểm tra dữ liệu:** Pydantic v2
+- **Kiểm thử:** Pytest
+
+---
+
+## 📁 Cấu Trúc Thư Mục
 
 ```text
 Project/
 ├── app/
-│   ├── __init__.py
-│   ├── main.py                     # Khởi tạo FastAPI app, lifespan, CORS, middleware, routers
+│   ├── main.py                     # Khởi tạo ứng dụng FastAPI, CORS và xử lý lỗi tập trung
 │   ├── core/
-│   │   ├── __init__.py
-│   │   ├── config.py               # Pydantic Settings đọc cấu hình từ .env
-│   │   ├── security.py             # Hash mật khẩu (bcrypt) và mã hóa/giải mã JWT token
-│   │   └── exceptions.py           # Custom exceptions & handlers format JSON error chuẩn
+│   │   ├── config.py               # Đọc cấu hình từ file .env
+│   │   └── security.py             # Băm mật khẩu bcrypt và mã hóa/giải mã JWT
 │   ├── db/
-│   │   ├── __init__.py
-│   │   ├── database.py             # SQLAlchemy engine, SessionLocal, Base, get_db dependency
-│   │   ├── init_db.py              # Script khởi tạo bảng cơ sở dữ liệu
-│   │   └── seed.py                 # Script seed dữ liệu mẫu (User, Club, Member, Activity)
+│   │   ├── database.py             # Kết nối Database và session SQLAlchemy (get_db)
+│   │   ├── init_db.py              # Script khởi tạo bảng CSDL
+│   │   └── seed.py                 # Script nạp dữ liệu mẫu ban đầu
 │   ├── models/
-│   │   ├── __init__.py             # Export toàn bộ models
-│   │   ├── user.py                 # Model User & Enum UserRole (USER, ADMIN)
-│   │   ├── club.py                 # Model Club, ClubMember & Enum ClubRole (OWNER, MEMBER)
-│   │   └── activity.py             # Model ClubActivity & Enums ActivityStatus, ActivityPriority
+│   │   ├── user.py                 # Bảng User
+│   │   ├── club.py                 # Bảng Club và ClubMember
+│   │   └── activity.py             # Bảng ClubActivity
 │   ├── schemas/
-│   │   ├── __init__.py
-│   │   ├── user.py                 # Pydantic schemas cho User (Base, Create, Update, Response)
-│   │   ├── club.py                 # Pydantic schemas cho Club & ClubMember
-│   │   ├── activity.py             # Pydantic schemas cho ClubActivity
-│   │   └── common.py               # StandardResponse, ErrorResponse, HealthCheckResponse
-│   ├── routers/
-│   │   ├── __init__.py
-│   │   ├── health.py               # Health check endpoints (/health, /api/v1/health)
-│   │   ├── auth.py                 # Router Auth (chuẩn bị cho Tiết 2)
-│   │   ├── users.py                # Router Users (chuẩn bị cho Tiết 2)
-│   │   ├── club.py                 # Router Club (chuẩn bị cho Tiết 3)
-│   │   └── activity.py             # Router Activity (chuẩn bị cho Tiết 4)
-│   ├── services/
-│   │   └── __init__.py             # Business logic layer
+│   │   ├── user.py                 # Pydantic Schemas cho User & Auth
+│   │   ├── club.py                 # Pydantic Schemas cho Club & Member
+│   │   └── activity.py             # Pydantic Schemas cho Activity
 │   ├── dependencies/
-│   │   ├── __init__.py
-│   │   ├── db.py                   # get_db dependency
-│   │   └── auth.py                 # get_current_user & role guard dependencies
-│   └── utils/
-│       └── __init__.py             # Utilities & helper functions
+│   │   └── auth.py                 # Dependency get_current_user và require_admin
+│   └── routers/
+│       ├── health.py               # API kiểm tra trạng thái hệ thống
+│       ├── auth.py                 # API Đăng ký, Đăng nhập
+│       ├── users.py                # API Profile cá nhân, Quản lý tài khoản (Admin)
+│       ├── club.py                 # API Quản lý CLB & Thành viên
+│       └── activity.py             # API Quản lý công việc CLB
 ├── tests/
-│   ├── __init__.py
-│   ├── conftest.py                 # Test fixtures & in-memory SQLite setup
-│   └── test_health_and_models.py   # Test suite kiểm thử toàn diện Tiết 1
-├── .env                            # Biến môi trường hiện tại
-├── .env.example                    # Mẫu biến môi trường
-├── requirements.txt                # Danh sách thư viện phụ thuộc
-└── README.md                       # Tài liệu hướng dẫn dự án
+│   ├── conftest.py                 # Cấu hình test database SQLite in-memory
+│   ├── test_health_and_models.py   # Test kết nối & model
+│   ├── test_auth_and_users.py      # Test xác thực & phân quyền
+│   └── test_clubs.py               # Test chức năng CLB & Thành viên
+├── .env                            # Biến môi trường
+├── requirements.txt                # Danh sách thư viện
+└── README.md                       # Tài liệu hướng dẫn
 ```
 
 ---
 
-## ⚙️ 2. Cài đặt & Cấu hình môi trường
+## 🚀 Hướng Dẫn Cài Đặt & Chạy Dự Án
 
-### Bước 1: Kích hoạt môi trường ảo (.venv)
-Môi trường ảo đã được tạo sẵn trong thư mục gốc. Để kích hoạt:
-* **Trên PowerShell (Windows):**
+### 1. Kích hoạt môi trường ảo (.venv)
+- **PowerShell:**
   ```powershell
   ..\.venv\Scripts\Activate.ps1
   ```
-* **Hoặc Command Prompt (CMD):**
+- **Command Prompt (CMD):**
   ```cmd
   ..\.venv\Scripts\activate.bat
   ```
 
-### Bước 2: Cài đặt thư viện (nếu cần cập nhật thêm)
+### 2. Cài đặt thư viện (nếu cần)
 ```bash
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-### Bước 3: Cấu hình biến môi trường (`.env`)
-File `.env` mặc định sử dụng SQLite để chạy ngay không cần cài đặt MySQL:
-```env
-DATABASE_URL=sqlite:///./club_management.db
-SECRET_KEY=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=60
-REFRESH_TOKEN_EXPIRE_DAYS=7
-API_V1_STR=/api/v1
-PROJECT_NAME=Student Club Management API
-```
-
----
-
-## 🗄️ 3. Khởi tạo Database & Seed Dữ Liệu Mẫu
-
-### 1. Khởi tạo các bảng Database
-Đứng tại thư mục `Project`:
+### 3. Khởi tạo Database & Nạp dữ liệu mẫu
 ```bash
 python -m app.db.init_db
-```
-
-### 2. Nạp dữ liệu mẫu (Seed Data)
-```bash
 python -m app.db.seed
 ```
 
-> **Tài khoản mẫu sau khi seed:**
-> - **Admin**: `admin@ptit.edu.vn` | Password: `123456` (Role: ADMIN)
-> - **Chủ nhiệm**: `president@ptit.edu.vn` | Password: `123456` (Role: USER / Club OWNER)
-> - **Thành viên 1**: `member1@ptit.edu.vn` | Password: `123456` (Role: USER / Club MEMBER)
-> - **Thành viên 2**: `member2@ptit.edu.vn` | Password: `123456` (Role: USER / Club MEMBER)
-
----
-
-## 🚀 4. Khởi chạy Server FastAPI
-
-Chạy lệnh sau tại thư mục `Project`:
+### 4. Khởi chạy Server
 ```bash
-python -m uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload
 ```
 
-Sau khi server chạy, bạn truy cập:
-* **Swagger UI API Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-* **ReDoc Docs**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
-* **Health Check API**: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+Sau khi chạy, truy cập tài liệu Swagger UI tại: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ---
 
-## 🧪 5. Chạy Test Tự Động (Pytest)
+## 👥 Tài Khoản Mẫu Để Thử Nghiệm
 
-Chạy lệnh sau tại thư mục `Project`:
+Mật khẩu chung cho tất cả tài khoản là: `123456`
+
+| Vai trò | Email | Quyền hạn |
+| :--- | :--- | :--- |
+| **Quản trị viên (Admin)** | `admin@ptit.edu.vn` | Toàn quyền hệ thống, xem toàn bộ User & CLB |
+| **Chủ nhiệm CLB (Owner)** | `president@ptit.edu.vn` | Quản lý CLB của mình, thêm/xóa thành viên |
+| **Thành viên 1 (Member)** | `member1@ptit.edu.vn` | Thành viên tham gia CLB |
+| **Thành viên 2 (Member)** | `member2@ptit.edu.vn` | Thành viên tham gia CLB |
+
+---
+
+## 📌 Các Nhóm Chức Năng Chính
+
+1. **Authentication & User:**
+   - Đăng ký tài khoản mới (`POST /api/v1/auth/register`)
+   - Đăng nhập lấy Bearer Token (`POST /api/v1/auth/login`)
+   - Xem thông tin cá nhân (`GET /api/v1/users/me`)
+   - Xem danh sách người dùng, tìm kiếm & lọc trạng thái (`GET /api/v1/users` - Admin)
+
+2. **Quản lý Câu Lạc Bộ & Thành Viên:**
+   - Tạo CLB mới (`POST /api/v1/clubs`) - Người tạo tự động thành `OWNER`
+   - Xem danh sách CLB (`GET /api/v1/clubs`)
+   - Xem chi tiết CLB & danh sách thành viên (`GET /api/v1/clubs/{id}`)
+   - Cập nhật thông tin CLB (`PUT /api/v1/clubs/{id}` - Chỉ Owner/Admin)
+   - Xóa CLB (`DELETE /api/v1/clubs/{id}` - Chỉ Owner/Admin)
+   - Thêm thành viên vào CLB (`POST /api/v1/clubs/{id}/members`)
+   - Xóa thành viên khỏi CLB (`DELETE /api/v1/clubs/{id}/members/{user_id}`)
+   - Tự rời CLB (`POST /api/v1/clubs/{id}/leave`)
+   - Chuyển quyền Chủ nhiệm (`POST /api/v1/clubs/{id}/transfer-owner`)
+
+3. **Hệ Thống:**
+   - Kiểm tra kết nối Server & Database (`GET /api/v1/health`)
+
+---
+
+## 🧪 Kiểm Thử Tự Động (Tests)
+
+Chạy bộ kiểm thử tự động bằng lệnh:
 ```bash
-python -m pytest -v
+pytest -v
 ```
-
----
-
-## 📊 Bảng tiến độ Task Tiết 1 (Day 1) theo File Sheet
-
-| STT | Nhóm Task | Nhiệm vụ chi tiết | Mức độ | Điểm | Trạng thái |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | Khởi tạo dự án | Cấu trúc source module hóa: routers, models, schemas, services, dependencies, core, db | Bắt buộc | 2 | ✅ Hoàn thành |
-| 2 | Khởi tạo dự án | Cấu hình môi trường `.env`, `.env.example`, Pydantic Settings đọc config | Bắt buộc | 2 | ✅ Hoàn thành |
-| 3 | Database | Kết nối MySQL/SQLite bằng SQLAlchemy, `engine`, `SessionLocal`, dependency `get_db` | Bắt buộc | 2 | ✅ Hoàn thành |
-| 4 | Database | Thiết kế model `User`, `Club`, `ClubMember`, `ClubActivity` với đầy đủ quan hệ, khóa ngoại | Bắt buộc | 3 | ✅ Hoàn thành |
-| 5 | Database | Pydantic schemas (Base, Create, Update, Response) với `from_attributes = True` | Bắt buộc | 2 | ✅ Hoàn thành |
-| 6 | Database | Khởi tạo bảng tự động qua SQLAlchemy metadata (`init_db.py`) | Bắt buộc | 2 | ✅ Hoàn thành |
-| 7 | Core | Custom Exception handling (400, 403, 404, 422, 500) format chuẩn và endpoint `/health` | Bắt buộc | 2 | ✅ Hoàn thành |
-| 8 | Nâng cao | Script seed dữ liệu mẫu (`seed.py`) | Không bắt buộc | 5 (Bonus) | ✅ Hoàn thành |
-| **Tổng** | | | | **20 / 20** | **100% Hoàn thành** |
