@@ -88,16 +88,18 @@ Sau khi chạy, truy cập tài liệu Swagger UI tại: [http://127.0.0.1:8000/
 
 ---
 
-## 👥 Tài Khoản Mẫu Để Thử Nghiệm
+## 👥 Danh Sách Tài Khoản Mẫu (Mật khẩu chung: `123456`)
 
-Mật khẩu chung cho tất cả tài khoản là: `123456`
-
-| Vai trò | Email | Quyền hạn |
-| :--- | :--- | :--- |
-| **Quản trị viên (Admin)** | `admin@ptit.edu.vn` | Toàn quyền hệ thống, xem toàn bộ User & CLB |
-| **Chủ nhiệm CLB (Owner)** | `president@ptit.edu.vn` | Quản lý CLB của mình, thêm/xóa thành viên |
-| **Thành viên 1 (Member)** | `member1@ptit.edu.vn` | Thành viên tham gia CLB |
-| **Thành viên 2 (Member)** | `member2@ptit.edu.vn` | Thành viên tham gia CLB |
+| STT | Nhóm Tài Khoản | Họ và Tên | Email | Vai trò trong hệ thống |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | **ADMIN (1 user)** | Admin Hệ Thống | `admin@ptit.edu.vn` | Quản trị viên toàn trường (Xem mọi User & CLB) |
+| 2 | **OWNER 1 (Chủ nhiệm)** | Nguyễn Văn Chủ Nhiệm 1 | `owner1@ptit.edu.vn` | Chủ nhiệm **CLB Lập Trình** |
+| 3 | **OWNER 2 (Chủ nhiệm)** | Trần Thị Chủ Nhiệm 2 | `owner2@ptit.edu.vn` | Chủ nhiệm **CLB Truyền Thông** |
+| 4 | **MEMBER 1 (Thành viên)** | Lê Văn Member 1 | `member1@ptit.edu.vn` | Thành viên CLB Lập Trình |
+| 5 | **MEMBER 2 (Thành viên)** | Phạm Thị Member 2 | `member2@ptit.edu.vn` | Thành viên cả 2 CLB |
+| 6 | **MEMBER 3 (Thành viên)** | Hoàng Văn Member 3 | `member3@ptit.edu.vn` | Thành viên CLB Truyền Thông |
+| 7 | **TỰ DO 1 (Chưa vào CLB)** | Đỗ Văn Sinh Viên Tự Do 1 | `student1@ptit.edu.vn` | Sinh viên tự do (Chưa tham gia CLB nào) |
+| 8 | **TỰ DO 2 (Chưa vào CLB)** | Vũ Thị Sinh Viên Tự Do 2 | `student2@ptit.edu.vn` | Sinh viên tự do (Chưa tham gia CLB nào) |
 
 ---
 
