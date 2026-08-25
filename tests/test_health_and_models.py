@@ -2,19 +2,12 @@ from app.core.security import hash_password, verify_password, create_access_toke
 from app.models import User, Club, ClubMember, ClubActivity
 
 
-def test_health_check_endpoint(client):
-    response = client.get("/health")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["status"] == "healthy"
-    assert data["database"] == "connected"
-
-
 def test_api_v1_health_check_endpoint(client):
     response = client.get("/api/v1/health")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "healthy"
+    assert data["database"] == "connected"
 
 
 def test_root_endpoint(client):

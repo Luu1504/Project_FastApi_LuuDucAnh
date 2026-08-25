@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from app.schemas.user import UserResponse
 
@@ -9,15 +9,9 @@ class ClubCreate(BaseModel):
     description: Optional[str] = None
 
 
-class ClubResponse(BaseModel):
-    id: int
-    name: str
+class ClubUpdate(BaseModel):
+    name: Optional[str] = None
     description: Optional[str] = None
-    owner_id: int
-    created_at: datetime
-    owner: Optional[UserResponse] = None
-
-    model_config = ConfigDict(from_attributes=True)
 
 
 class ClubMemberCreate(BaseModel):
@@ -34,3 +28,30 @@ class ClubMemberResponse(BaseModel):
     user: Optional[UserResponse] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ClubResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    owner_id: int
+    created_at: datetime
+    owner: Optional[UserResponse] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ClubDetailResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    owner_id: int
+    created_at: datetime
+    owner: Optional[UserResponse] = None
+    members: List[ClubMemberResponse] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TransferOwnerRequest(BaseModel):
+    new_owner_id: int

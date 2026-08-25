@@ -45,7 +45,6 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     )
 
 
-app.include_router(health_router)
 app.include_router(health_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")

@@ -4,12 +4,12 @@ from app.db.database import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, LoginRequest, TokenResponse
 from app.core.security import hash_password, verify_password, create_access_token
-
+from app.dependencies import require_admin
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def register(data: UserCreate, db: Session = Depends(get_db)):
+@router.post("/register",response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def register(data: UserCreate ,db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == data.email).first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email da duoc su dung")
 
