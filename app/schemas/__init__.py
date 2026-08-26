@@ -1,7 +1,6 @@
 from app.schemas.user import (
     UserCreate,
     UserUpdate,
-    UserStatusUpdate,
     UserResponse,
     TokenResponse,
     LoginRequest,
@@ -13,21 +12,17 @@ from app.schemas.club import (
     ClubDetailResponse,
     ClubMemberCreate,
     ClubMemberResponse,
-    TransferOwnerRequest,
 )
 from app.schemas.activity import (
     ActivityCreate,
     ActivityUpdate,
-    ActivityStatusUpdate,
     ActivityResponse,
-    ActivityStatsResponse,
     PaginatedActivityResponse,
 )
 
 __all__ = [
     "UserCreate",
     "UserUpdate",
-    "UserStatusUpdate",
     "UserResponse",
     "TokenResponse",
     "LoginRequest",
@@ -37,11 +32,8 @@ __all__ = [
     "ClubDetailResponse",
     "ClubMemberCreate",
     "ClubMemberResponse",
-    "TransferOwnerRequest",
     "ActivityCreate",
     "ActivityUpdate",
-    "ActivityStatusUpdate",
     "ActivityResponse",
-    "ActivityStatsResponse",
     "PaginatedActivityResponse",
 ]

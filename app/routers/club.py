@@ -11,7 +11,6 @@ from app.schemas.club import (
     ClubDetailResponse,
     ClubMemberCreate,
     ClubMemberResponse,
-    TransferOwnerRequest,
 )
 from app.dependencies.auth import get_current_user
 
@@ -238,73 +237,3 @@ def remove_member(
     db.delete(member)
     db.commit()
     return {"message": "Da xoa thanh vien khoi CLB"}
-
-
-@router.post("/{club_id}/leave", status_code=status.HTTP_200_OK)
-def leave_club(
-    club_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    club = db.query(Club).filter(Club.id == club_id).first()
-    if not club:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="CLB khong ton tai")
-
-    if club.owner_id == current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="OWNER khong the roi CLB, vui long chuyen quyen hoac giai tan CLB",
-        )
-
-    member = db.query(ClubMember).filter(
-        ClubMember.club_id == club_id,
-        ClubMember.user_id == current_user.id,
-    ).first()
-    if not member:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Ban khong phai thanh vien cua CLB nay")
-
-    db.delete(member)
-    db.commit()
-    return {"message": "Ban da roi CLB thanh cong"}
-
-
-@router.post("/{club_id}/transfer-owner", status_code=status.HTTP_200_OK)
-def transfer_owner(
-    club_id: int,
-    data: TransferOwnerRequest,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    club = db.query(Club).filter(Club.id == club_id).first()
-    if not club:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="CLB khong ton tai")
-
-    if current_user.role != "ADMIN" and club.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Chi OWNER moi co quyen chuyen nhuong")
-
-    new_owner_member = db.query(ClubMember).filter(
-        ClubMember.club_id == club_id,
-        ClubMember.user_id == data.new_owner_id,
-    ).first()
-    if not new_owner_member:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Nguoi duoc chuyen quyen phai la thanh vien trong CLB",
-        )
-
-    old_owner_member = db.query(ClubMember).filter(
-        ClubMember.club_id == club_id,
-        ClubMember.user_id == club.owner_id,
-    ).first()
-    if old_owner_member:
-        old_owner_member.role = "MEMBER"
-
-    club.owner_id = data.new_owner_id
-    new_owner_member.role = "OWNER"
-
-    db.commit()
-    return {"message": f"Da chuyen quyen OWNER sang user_id = {data.new_owner_id}"}

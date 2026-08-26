@@ -108,12 +108,3 @@ def test_admin_get_users_list_and_user_crud(client):
     u_update = client.put(f"/api/v1/users/{user_id}", json={"full_name": "Updated Regular"}, headers=user_headers)
     assert u_update.status_code == 200
     assert u_update.json()["full_name"] == "Updated Regular"
-
-    # 7. Admin lock user status
-    status_res = client.patch(f"/api/v1/users/{user_id}/status", json={"is_active": False}, headers=admin_headers)
-    assert status_res.status_code == 200
-    assert status_res.json()["is_active"] is False
-
-    # 8. Locked user cannot login
-    locked_login = client.post("/api/v1/auth/login", json={"email": "regular@ptit.edu.vn", "password": "password123"})
-    assert locked_login.status_code == 403

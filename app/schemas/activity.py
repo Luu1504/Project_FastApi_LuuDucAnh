@@ -21,10 +21,6 @@ class ActivityUpdate(BaseModel):
     due_date: Optional[datetime] = None
 
 
-class ActivityStatusUpdate(BaseModel):
-    status: str
-
-
 class ActivityResponse(BaseModel):
     id: int
     club_id: int
@@ -38,14 +34,6 @@ class ActivityResponse(BaseModel):
     assignee: Optional[UserResponse] = None
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class ActivityStatsResponse(BaseModel):
-    total: int
-    todo: int
-    in_progress: int
-    done: int
-    completion_rate: float
 
 
 class PaginatedActivityResponse(BaseModel):

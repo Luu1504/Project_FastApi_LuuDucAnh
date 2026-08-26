@@ -20,7 +20,7 @@ Hệ thống Backend RESTful API phục vụ quản lý hoạt động câu lạ
 ```text
 Project/
 ├── app/
-│   ├── main.py                     # Khởi tạo ứng dụng FastAPI, CORS và xử lý lỗi tập trung
+│   ├── main.py                     # Khởi tạo FastAPI app, CORS, Exception handler
 │   ├── core/
 │   │   ├── config.py               # Đọc cấu hình từ file .env
 │   │   └── security.py             # Băm mật khẩu bcrypt và mã hóa/giải mã JWT
@@ -39,7 +39,7 @@ Project/
 │   ├── dependencies/
 │   │   └── auth.py                 # Dependency get_current_user và require_admin
 │   └── routers/
-│       ├── health.py               # API kiểm tra trạng thái hệ thống
+│       ├── health.py               # API kiểm tra kết nối hệ thống
 │       ├── auth.py                 # API Đăng ký, Đăng nhập
 │       ├── users.py                # API Profile cá nhân, Quản lý tài khoản (Admin)
 │       ├── club.py                 # API Quản lý CLB & Thành viên
@@ -48,7 +48,8 @@ Project/
 │   ├── conftest.py                 # Cấu hình test database SQLite in-memory
 │   ├── test_health_and_models.py   # Test kết nối & model
 │   ├── test_auth_and_users.py      # Test xác thực & phân quyền
-│   └── test_clubs.py               # Test chức năng CLB & Thành viên
+│   ├── test_clubs.py               # Test chức năng CLB & Thành viên
+│   └── test_activities.py          # Test chức năng hoạt động & phân trang
 ├── .env                            # Biến môi trường
 ├── requirements.txt                # Danh sách thư viện
 └── README.md                       # Tài liệu hướng dẫn
@@ -103,27 +104,36 @@ Sau khi chạy, truy cập tài liệu Swagger UI tại: [http://127.0.0.1:8000/
 
 ---
 
-## 📌 Các Nhóm Chức Năng Chính
+## 📌 Các Nhóm Chức Năng Chính (Chuẩn Cốt Lõi)
 
 1. **Authentication & User:**
-   - Đăng ký tài khoản mới (`POST /api/v1/auth/register`)
-   - Đăng nhập lấy Bearer Token (`POST /api/v1/auth/login`)
-   - Xem thông tin cá nhân (`GET /api/v1/users/me`)
-   - Xem danh sách người dùng, tìm kiếm & lọc trạng thái (`GET /api/v1/users` - Admin)
+   - Đăng ký tài khoản mới (`POST /auth/register`)
+   - Đăng nhập lấy Bearer Token (`POST /auth/login`)
+   - Xem thông tin cá nhân (`GET /users/me`)
+   - Xem danh sách người dùng (`GET /users` - Admin)
+   - Xem chi tiết người dùng (`GET /users/{id}`)
+   - Cập nhật thông tin người dùng (`PUT /users/{id}`)
+   - Xóa tài khoản (`DELETE /users/{id}` - Admin)
 
 2. **Quản lý Câu Lạc Bộ & Thành Viên:**
-   - Tạo CLB mới (`POST /api/v1/clubs`) - Người tạo tự động thành `OWNER`
-   - Xem danh sách CLB (`GET /api/v1/clubs`)
-   - Xem chi tiết CLB & danh sách thành viên (`GET /api/v1/clubs/{id}`)
-   - Cập nhật thông tin CLB (`PUT /api/v1/clubs/{id}` - Chỉ Owner/Admin)
-   - Xóa CLB (`DELETE /api/v1/clubs/{id}` - Chỉ Owner/Admin)
-   - Thêm thành viên vào CLB (`POST /api/v1/clubs/{id}/members`)
-   - Xóa thành viên khỏi CLB (`DELETE /api/v1/clubs/{id}/members/{user_id}`)
-   - Tự rời CLB (`POST /api/v1/clubs/{id}/leave`)
-   - Chuyển quyền Chủ nhiệm (`POST /api/v1/clubs/{id}/transfer-owner`)
+   - Tạo CLB mới (`POST /clubs`) - Người tạo tự động thành `OWNER`
+   - Xem danh sách CLB (`GET /clubs`)
+   - Xem chi tiết CLB & danh sách thành viên (`GET /clubs/{id}`)
+   - Xem danh sách thành viên trong CLB (`GET /clubs/{id}/members`)
+   - Cập nhật thông tin CLB (`PUT /clubs/{id}` - Chỉ Owner/Admin)
+   - Xóa CLB (`DELETE /clubs/{id}` - Chỉ Owner/Admin)
+   - Thêm thành viên vào CLB (`POST /clubs/{id}/members`)
+   - Xóa thành viên khỏi CLB (`DELETE /clubs/{id}/members/{user_id}`)
 
-3. **Hệ Thống:**
-   - Kiểm tra kết nối Server & Database (`GET /api/v1/health`)
+3. **Quản lý Hoạt Động (Activities):**
+   - Tạo hoạt động trong CLB (`POST /clubs/{club_id}/activities`)
+   - Xem danh sách hoạt động có Tìm kiếm, Lọc trạng thái/ưu tiên & Phân trang (`GET /clubs/{club_id}/activities`)
+   - Xem chi tiết hoạt động (`GET /activities/{id}`)
+   - Cập nhật hoạt động (`PUT /activities/{id}`)
+   - Xóa hoạt động (`DELETE /activities/{id}`)
+
+4. **Hệ Thống:**
+   - Kiểm tra kết nối Server & Database (`GET /health`)
 
 ---
 

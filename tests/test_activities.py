@@ -47,15 +47,6 @@ def test_create_activity_and_pagination(client):
     filter_data = filter_res.json()
     assert filter_data["total"] == 1
 
-    # 6. Activity Stats
-    stats_res = client.get(f"/api/v1/clubs/{club_id}/activities/stats", headers=headers)
-    assert stats_res.status_code == 200
-    stats = stats_res.json()
-    assert stats["total"] == 3
-    assert stats["todo"] == 3
-    assert stats["done"] == 0
-    assert stats["completion_rate"] == 0.0
-
 
 def test_update_and_delete_activity(client):
     # 1. Register Owner & Create Club
@@ -90,11 +81,6 @@ def test_update_and_delete_activity(client):
     assert up_res.json()["status"] == "DONE"
     assert up_res.json()["title"] == "Task Done"
 
-    # 4. Check stats after update
-    stats_res = client.get(f"/api/v1/clubs/{club_id}/activities/stats", headers=headers)
-    assert stats_res.json()["done"] == 1
-    assert stats_res.json()["completion_rate"] == 100.0
-
-    # 5. Delete Activity
+    # 4. Delete Activity
     del_res = client.delete(f"/api/v1/activities/{act_id}", headers=headers)
     assert del_res.status_code == 200

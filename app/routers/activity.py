@@ -8,9 +8,7 @@ from app.models.user import User
 from app.schemas.activity import (
     ActivityCreate,
     ActivityUpdate,
-    ActivityStatusUpdate,
     ActivityResponse,
-    ActivityStatsResponse,
     PaginatedActivityResponse,
 )
 from app.dependencies.auth import get_current_user
@@ -109,49 +107,6 @@ def get_club_activities(
     )
 
 
-@router.get("/clubs/{club_id}/activities/stats", response_model=ActivityStatsResponse, status_code=status.HTTP_200_OK)
-def get_club_activity_stats(
-    club_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    club = db.query(Club).filter(Club.id == club_id).first()
-    if not club:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="CLB khong ton tai")
-
-    is_member = db.query(ClubMember).filter(
-        ClubMember.club_id == club_id,
-        ClubMember.user_id == current_user.id,
-    ).first()
-
-    if current_user.role != "ADMIN" and not is_member:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Ban khong phai thanh vien cua CLB nay")
-
-    total = db.query(ClubActivity).filter(ClubActivity.club_id == club_id).count()
-    todo = db.query(ClubActivity).filter(ClubActivity.club_id == club_id, ClubActivity.status == "TODO").count()
-    in_progress = db.query(ClubActivity).filter(ClubActivity.club_id == club_id, ClubActivity.status == "IN_PROGRESS").count()
-    done = db.query(ClubActivity).filter(ClubActivity.club_id == club_id, ClubActivity.status == "DONE").count()
-
-    completion_rate = round((done / total * 100), 2) if total > 0 else 0.0
-
-    return ActivityStatsResponse(
-        total=total,
-        todo=todo,
-        in_progress=in_progress,
-        done=done,
-        completion_rate=completion_rate,
-    )
-
-
-@router.get("/activities/my-activities", response_model=List[ActivityResponse], status_code=status.HTTP_200_OK)
-def get_my_activities(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    activities = db.query(ClubActivity).filter(ClubActivity.assignee_id == current_user.id).all()
-    return activities
-
-
 @router.get("/activities/{activity_id}", response_model=ActivityResponse, status_code=status.HTTP_200_OK)
 def get_activity_detail(
     activity_id: int,
@@ -213,30 +168,6 @@ def update_activity(
         else:
             activity.assignee_id = None
 
-    db.commit()
-    db.refresh(activity)
-    return activity
-
-
-@router.patch("/activities/{activity_id}/status", response_model=ActivityResponse, status_code=status.HTTP_200_OK)
-def update_activity_status(
-    activity_id: int,
-    data: ActivityStatusUpdate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    activity = db.query(ClubActivity).filter(ClubActivity.id == activity_id).first()
-    if not activity:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hoat dong khong ton tai")
-
-    club = db.query(Club).filter(Club.id == activity.club_id).first()
-    is_owner = club and club.owner_id == current_user.id
-    is_assignee = activity.assignee_id == current_user.id
-
-    if current_user.role != "ADMIN" and not is_owner and not is_assignee:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Chi OWNER, nguoi duoc giao viec hoac ADMIN moi co quyen sua trang thai")
-
-    activity.status = data.status.upper()
     db.commit()
     db.refresh(activity)
     return activity

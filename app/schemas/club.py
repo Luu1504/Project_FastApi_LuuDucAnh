@@ -51,7 +51,3 @@ class ClubDetailResponse(BaseModel):
     members: List[ClubMemberResponse] = []
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class TransferOwnerRequest(BaseModel):
-    new_owner_id: int
