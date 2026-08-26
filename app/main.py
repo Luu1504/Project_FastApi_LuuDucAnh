@@ -28,6 +28,7 @@ def format_response(status_code: int, message: str, data=None, error=None):
     return {
         "status_code": status_code,
         "message": message,
+        "detail": message,
         "data": data,
         "error": error,
     }
@@ -45,11 +46,18 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     )
 
 
+# Ho tro ca duong dan co prefix /api/v1 va duong dan truc tiep
 app.include_router(health_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
 app.include_router(club_router, prefix="/api/v1")
 app.include_router(activity_router, prefix="/api/v1")
+
+app.include_router(health_router)
+app.include_router(auth_router)
+app.include_router(users_router)
+app.include_router(club_router)
+app.include_router(activity_router)
 
 
 @app.get("/")
