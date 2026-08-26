@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from app.schemas.user import UserResponse
 
@@ -34,3 +34,18 @@ class ActivityResponse(BaseModel):
     assignee: Optional[UserResponse] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ActivityStatsResponse(BaseModel):
+    total: int
+    todo: int
+    in_progress: int
+    done: int
+    completion_rate: float
+
+
+class PaginatedActivityResponse(BaseModel):
+    total: int
+    page: int
+    page_size: int
+    items: List[ActivityResponse]

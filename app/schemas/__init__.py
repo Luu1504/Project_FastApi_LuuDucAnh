@@ -8,7 +8,13 @@ from app.schemas.club import (
     ClubMemberResponse,
     TransferOwnerRequest,
 )
-from app.schemas.activity import ActivityCreate, ActivityUpdate, ActivityResponse
+from app.schemas.activity import (
+    ActivityCreate,
+    ActivityUpdate,
+    ActivityResponse,
+    ActivityStatsResponse,
+    PaginatedActivityResponse,
+)
 
 __all__ = [
     "UserCreate",
@@ -25,4 +31,6 @@ __all__ = [
     "ActivityCreate",
     "ActivityUpdate",
     "ActivityResponse",
+    "ActivityStatsResponse",
+    "PaginatedActivityResponse",
 ]
