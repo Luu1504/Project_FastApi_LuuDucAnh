@@ -21,6 +21,10 @@ class ActivityUpdate(BaseModel):
     due_date: Optional[datetime] = None
 
 
+class ActivityStatusUpdate(BaseModel):
+    status: str
+
+
 class ActivityResponse(BaseModel):
     id: int
     club_id: int

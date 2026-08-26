@@ -8,6 +8,7 @@ from app.models.user import User
 from app.schemas.activity import (
     ActivityCreate,
     ActivityUpdate,
+    ActivityStatusUpdate,
     ActivityResponse,
     ActivityStatsResponse,
     PaginatedActivityResponse,
@@ -212,6 +213,30 @@ def update_activity(
         else:
             activity.assignee_id = None
 
+    db.commit()
+    db.refresh(activity)
+    return activity
+
+
+@router.patch("/activities/{activity_id}/status", response_model=ActivityResponse, status_code=status.HTTP_200_OK)
+def update_activity_status(
+    activity_id: int,
+    data: ActivityStatusUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    activity = db.query(ClubActivity).filter(ClubActivity.id == activity_id).first()
+    if not activity:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hoat dong khong ton tai")
+
+    club = db.query(Club).filter(Club.id == activity.club_id).first()
+    is_owner = club and club.owner_id == current_user.id
+    is_assignee = activity.assignee_id == current_user.id
+
+    if current_user.role != "ADMIN" and not is_owner and not is_assignee:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Chi OWNER, nguoi duoc giao viec hoac ADMIN moi co quyen sua trang thai")
+
+    activity.status = data.status.upper()
     db.commit()
     db.refresh(activity)
     return activity

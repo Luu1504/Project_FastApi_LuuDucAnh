@@ -143,6 +143,30 @@ def delete_club(
     return {"message": "Xoa CLB thanh cong"}
 
 
+@router.get("/{club_id}/members", response_model=List[ClubMemberResponse], status_code=status.HTTP_200_OK)
+def get_club_members(
+    club_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    club = db.query(Club).filter(Club.id == club_id).first()
+    if not club:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="CLB khong ton tai")
+
+    is_member = db.query(ClubMember).filter(
+        ClubMember.club_id == club_id,
+        ClubMember.user_id == current_user.id,
+    ).first()
+
+    if current_user.role != "ADMIN" and not is_member:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Ban khong phai thanh vien cua CLB nay")
+
+    members = db.query(ClubMember).filter(ClubMember.club_id == club_id).all()
+    return members
+
+
 @router.post("/{club_id}/members", response_model=ClubMemberResponse, status_code=status.HTTP_201_CREATED)
 def add_member(
     club_id: int,

@@ -59,7 +59,7 @@ def test_get_profile_without_token(client):
     assert response.status_code == 401
 
 
-def test_admin_get_users_list(client):
+def test_admin_get_users_list_and_user_crud(client):
     # 1. Register Admin
     client.post("/api/v1/auth/register", json={
         "email": "admin1@ptit.edu.vn",
@@ -72,26 +72,48 @@ def test_admin_get_users_list(client):
         "password": "password123"
     }).json()
     admin_token = login_admin["access_token"]
+    admin_headers = {"Authorization": f"Bearer {admin_token}"}
 
     # 2. Register Regular User
-    client.post("/api/v1/auth/register", json={
+    user_res = client.post("/api/v1/auth/register", json={
         "email": "regular@ptit.edu.vn",
         "password": "password123",
         "full_name": "Regular User",
         "role": "USER"
-    })
+    }).json()
+    user_id = user_res["id"]
     login_user = client.post("/api/v1/auth/login", json={
         "email": "regular@ptit.edu.vn",
         "password": "password123"
     }).json()
     user_token = login_user["access_token"]
+    user_headers = {"Authorization": f"Bearer {user_token}"}
 
     # 3. Regular user calling /users -> 403 Forbidden
-    r_forbidden = client.get("/api/v1/users", headers={"Authorization": f"Bearer {user_token}"})
+    r_forbidden = client.get("/api/v1/users", headers=user_headers)
     assert r_forbidden.status_code == 403
 
     # 4. Admin calling /users -> 200 OK
-    r_admin = client.get("/api/v1/users", headers={"Authorization": f"Bearer {admin_token}"})
+    r_admin = client.get("/api/v1/users", headers=admin_headers)
     assert r_admin.status_code == 200
     users_list = r_admin.json()
     assert len(users_list) >= 2
+
+    # 5. User detail
+    u_detail = client.get(f"/api/v1/users/{user_id}", headers=user_headers)
+    assert u_detail.status_code == 200
+    assert u_detail.json()["full_name"] == "Regular User"
+
+    # 6. Update user
+    u_update = client.put(f"/api/v1/users/{user_id}", json={"full_name": "Updated Regular"}, headers=user_headers)
+    assert u_update.status_code == 200
+    assert u_update.json()["full_name"] == "Updated Regular"
+
+    # 7. Admin lock user status
+    status_res = client.patch(f"/api/v1/users/{user_id}/status", json={"is_active": False}, headers=admin_headers)
+    assert status_res.status_code == 200
+    assert status_res.json()["is_active"] is False
+
+    # 8. Locked user cannot login
+    locked_login = client.post("/api/v1/auth/login", json={"email": "regular@ptit.edu.vn", "password": "password123"})
+    assert locked_login.status_code == 403
