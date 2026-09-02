@@ -34,42 +34,40 @@ def get_all_users(
 
 
 @router.get("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
-def get_user_detail(
+def get_user_by_id(
     user_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if current_user.role != "ADMIN" and current_user.id != user_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Khong co quyen xem thong tin user nay")
-
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User khong ton tai")
-
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nguoi dung khong ton tai")
     return user
 
 
 @router.put("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
-def update_user(
+def update_user_by_id(
     user_id: int,
     data: UserUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if current_user.role != "ADMIN" and current_user.id != user_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Khong co quyen sua thong tin user nay")
-
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User khong ton tai")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nguoi dung khong ton tai")
 
-    if data.full_name is not None:
-        user.full_name = data.full_name
-    if data.email is not None:
-        existing = db.query(User).filter(User.email == data.email, User.id != user_id).first()
+    if current_user.role != "ADMIN" and current_user.id != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Khong co quyen cap nhat")
+
+    if data.email is not None and data.email != user.email:
+        existing = db.query(User).filter(User.email == data.email).first()
         if existing:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email da duoc su dung")
         user.email = data.email
+
+    if data.full_name is not None:
+        user.full_name = data.full_name
+
     if data.password is not None:
         user.password_hash = hash_password(data.password)
 
@@ -79,18 +77,18 @@ def update_user(
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_200_OK)
-def delete_user(
+def delete_user_by_id(
     user_id: int,
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User khong ton tai")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nguoi dung khong ton tai")
 
     if user.id == admin.id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Khong the tu xoa tai khoan admin dang dang nhap")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Khong the tu xoa tai khoan cua chinh minh")
 
     db.delete(user)
     db.commit()
-    return {"message": "Xoa user thanh cong"}
+    return {"message": "Xoa nguoi dung thanh cong"}

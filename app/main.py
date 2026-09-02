@@ -62,4 +62,9 @@ app.include_router(activity_router)
 
 @app.get("/")
 def root():
-    return {"message": "Student Club Management API", "docs": "/docs"}
+    return {
+        "message": "Welcome to Student Club Management API",
+        "docs": "/docs",
+        "docs_url": "/docs",
+        "api_v1": "/api/v1",
+    }
