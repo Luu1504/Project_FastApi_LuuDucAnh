@@ -16,5 +16,5 @@ def health_check(db: Session = Depends(get_db)):
 
     return {
         "status": "healthy",
-        "database": db_status
+        "database": db_status,
     }

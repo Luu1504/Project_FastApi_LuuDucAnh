@@ -17,7 +17,8 @@ def get_current_user_profile(current_user: User = Depends(get_current_user)):
 
 @router.get("", response_model=List[UserResponse], status_code=status.HTTP_200_OK)
 def get_all_users(
-    search: Optional[str] = Query(None, description="Tim kiem theo ten hoac email"),
+    search: Optional[str] = Query(
+        None, description="Tim kiem theo ten hoac email"),
     is_active: Optional[bool] = Query(None, description="Loc theo trang thai"),
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db),
@@ -25,7 +26,8 @@ def get_all_users(
     query = db.query(User)
 
     if search:
-        query = query.filter((User.full_name.ilike(f"%{search}%")) | (User.email.ilike(f"%{search}%")))
+        query = query.filter((User.full_name.ilike(f"%{search}%")) | (
+            User.email.ilike(f"%{search}%")))
 
     if is_active is not None:
         query = query.filter(User.is_active == is_active)
@@ -41,7 +43,8 @@ def get_user_by_id(
 ):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nguoi dung khong ton tai")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Nguoi dung khong ton tai")
     return user
 
 
@@ -54,15 +57,18 @@ def update_user_by_id(
 ):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nguoi dung khong ton tai")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Nguoi dung khong ton tai")
 
     if current_user.role != "ADMIN" and current_user.id != user_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Khong co quyen cap nhat")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Khong co quyen cap nhat")
 
     if data.email is not None and data.email != user.email:
         existing = db.query(User).filter(User.email == data.email).first()
         if existing:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email da duoc su dung")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Email da duoc su dung")
         user.email = data.email
 
     if data.full_name is not None:
@@ -84,10 +90,12 @@ def delete_user_by_id(
 ):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Nguoi dung khong ton tai")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Nguoi dung khong ton tai")
 
     if user.id == admin.id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Khong the tu xoa tai khoan cua chinh minh")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Khong the tu xoa tai khoan cua chinh minh")
 
     db.delete(user)
     db.commit()

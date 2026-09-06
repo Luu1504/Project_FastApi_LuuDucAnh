@@ -26,7 +26,7 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.post("/login", response_model=TokenResponse, status_code=status.HTTP_200_OK)
+@router.post("/login", response_model=TokenResponse, status_code=status.HTTP_422_UNPROCESSABLE_CONTENT)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     login_identifier = data.email or data.username
     if not login_identifier:

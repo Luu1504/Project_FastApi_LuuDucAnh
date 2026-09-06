@@ -11,6 +11,7 @@ from app.routers import (
 )
 from app.models import User, Club, ClubMember, ClubActivity
 
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Student Club Management API")

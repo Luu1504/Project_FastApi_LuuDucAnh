@@ -138,7 +138,7 @@ def seed_data():
             due_date=now + timedelta(days=3),
         )
 
-        # Task 3: DONE, URGENT - da hoan thanh (test completed_at, dem task done)
+        # Task 3: DONE, URGENT - da hoan thanh
         task_done = ClubActivity(
             club_id=club1.id,
             title="Thiet ke co so du lieu PostgreSQL",
@@ -147,10 +147,9 @@ def seed_data():
             status="DONE",
             priority="URGENT",
             due_date=now - timedelta(days=2),
-            completed_at=now - timedelta(days=1),
         )
 
-        # Task 4: TODO, LOW - TRE HAN (test Cau 12 De 3: is_overdue)
+        # Task 4: TODO, LOW - TRE HAN
         task_overdue = ClubActivity(
             club_id=club1.id,
             title="Tong hop danh sach thanh vien cu",
@@ -158,34 +157,26 @@ def seed_data():
             assignee_id=viewer.id,
             status="TODO",
             priority="LOW",
-            due_date=now - timedelta(days=1),  # Han chot o qua khu -> Qua han
+            due_date=now - timedelta(days=1),
         )
 
         db.add_all([task_todo, task_doing, task_done, task_overdue])
         db.commit()
 
         print("=" * 65)
-        print("🎉 NAP DU LIEU MAU THANH CONG 100%! BANG TRA CUU KHI THI:")
+        print("NAP DU LIEU MAU THANH CONG 100%! BANG TRA CUU KHI THI:")
         print("=" * 65)
-        print("🔑 TAI KHOAN (PASS CHUNG: 123456):")
-        print(
-            f"  • ADMIN      : admin@ptit.edu.vn    (ID={admin.id}, Role=ADMIN)")
-        print(
-            f"  • MANAGER    : manager@ptit.edu.vn  (ID={manager.id}, Role=MANAGER)")
-        print(
-            f"  • OWNER CLB  : owner@ptit.edu.vn    (ID={owner.id}, Role=USER)")
-        print(
-            f"  • MEMBER     : member@ptit.edu.vn   (ID={member.id}, Role=USER)")
-        print(
-            f"  • VIEWER     : viewer@ptit.edu.vn   (ID={viewer.id}, Role=USER)")
-        print(
-            f"  • BI KHOA    : locked@ptit.edu.vn   (ID={locked_user.id}, is_active=False)")
-        print(
-            f"  • TU DO      : student@gmail.com    (ID={free_student.id}, domain=gmail.com)")
+        print("TAI KHOAN (PASS CHUNG: 123456):")
+        print(f"  - ADMIN      : admin@ptit.edu.vn    (ID={admin.id}, Role=ADMIN)")
+        print(f"  - MANAGER    : manager@ptit.edu.vn  (ID={manager.id}, Role=MANAGER)")
+        print(f"  - OWNER CLB  : owner@ptit.edu.vn    (ID={owner.id}, Role=USER)")
+        print(f"  - MEMBER     : member@ptit.edu.vn   (ID={member.id}, Role=USER)")
+        print(f"  - VIEWER     : viewer@ptit.edu.vn   (ID={viewer.id}, Role=USER)")
+        print(f"  - BI KHOA    : locked@ptit.edu.vn   (ID={locked_user.id}, is_active=False)")
+        print(f"  - TU DO      : student@gmail.com    (ID={free_student.id}, domain=gmail.com)")
         print("-" * 65)
-        print(
-            f"🏢 CLB MAU     : ID={club1.id} (Owner ID={owner.id}, 3 Members)")
-        print("📋 TASKS MAU   : 4 tasks (TODO, IN_PROGRESS, DONE, OVERDUE)")
+        print(f"CLB MAU     : ID={club1.id} (Owner ID={owner.id}, 3 Members)")
+        print("TASKS MAU   : 4 tasks (TODO, IN_PROGRESS, DONE, OVERDUE)")
         print("=" * 65)
 
     finally:
