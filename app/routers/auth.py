@@ -11,7 +11,8 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(data: UserCreate, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == data.email).first():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email da duoc su dung")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email da duoc su dung")
 
     new_user = User(
         email=data.email,
@@ -29,14 +30,17 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     login_identifier = data.email or data.username
     if not login_identifier:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Vui long nhap email hoac username")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Vui long nhap email hoac username")
 
     user = db.query(User).filter(User.email == login_identifier).first()
     if not user or not verify_password(data.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email hoac mat khau khong dung")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Email hoac mat khau khong dung")
 
     if not user.is_active:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Tai khoan da bi khoa")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Tai khoan da bi khoa")
 
     access_token = create_access_token(user_id=user.id)
     return TokenResponse(access_token=access_token, token_type="bearer", user=user)
