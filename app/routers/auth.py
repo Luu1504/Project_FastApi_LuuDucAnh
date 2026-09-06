@@ -14,8 +14,10 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Email da duoc su dung")
 
+    clean_email = data.email.strip().lower()
+
     new_user = User(
-        email=data.email,
+        email=clean_email,
         password_hash=hash_password(data.password),
         full_name=data.full_name,
         role=data.role or "USER",
@@ -26,7 +28,7 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.post("/login", response_model=TokenResponse, status_code=status.HTTP_422_UNPROCESSABLE_CONTENT)
+@router.post("/login", response_model=TokenResponse, status_code=status.HTTP_200_OK)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     login_identifier = data.email or data.username
     if not login_identifier:
