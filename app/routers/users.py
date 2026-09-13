@@ -35,6 +35,7 @@ def get_all_users(
     return query.all()
 
 
+
 @router.get("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
 def get_user_by_id(
     user_id: int,

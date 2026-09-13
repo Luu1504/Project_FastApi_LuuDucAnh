@@ -14,10 +14,8 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Email da duoc su dung")
 
-    clean_email = data.email.strip().lower()
-
     new_user = User(
-        email=clean_email,
+        email=data.email,
         password_hash=hash_password(data.password),
         full_name=data.full_name,
         role=data.role or "USER",
